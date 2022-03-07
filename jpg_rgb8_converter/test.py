@@ -7,20 +7,23 @@ from PIL import Image as pil_image
 from io import BytesIO
 import base64
 
+'''
+Designed :
+    node : 
+        jpg_rgb8_converter_node
+    pub :
+        publisher:
+            topic : /jpg_uri
+    sub :
+        subscription :
+            topic : /rgb_cam/image_raw
+'''
+
+
 class jpg_rgb8_converter_node(Node):
 
     def __init__(self):        
-        '''
-        Designed :
-            node : 
-                jpg_rgb8_converter_node
-            pub :
-                publisher:
-                    topic : /jpg_uri
-            sub :
-                subscription :
-                    topic : /rgb_cam/image_raw
-        '''
+        
         # node
         super().__init__('jpg_rgb8_converter_node')
 
@@ -43,21 +46,10 @@ class jpg_rgb8_converter_node(Node):
         self.publisher
         self.subscription
 
-        # variables
-        self.img_data = []
-        self.img_uri = ''
-
 
     def listener_callback(self, rgb8_data):
-        """
-        Callback function.
-        """    
-        self.get_logger().info('get rgb8')
-
+        
         # convert to jpg
-        self.img_data = rgb8_data.data
-        # print(type(self.img_data))
-        # print(self.img_data)
         img = pil_image.frombytes('RGB', (rgb8_data.width, rgb8_data.height), rgb8_data.data.tobytes())
 
         # jpg get uri
@@ -67,11 +59,10 @@ class jpg_rgb8_converter_node(Node):
         # publish uri
         self.publisher.publish(uri)
 
-        self.get_logger().info('Publishing uri')
 
     @staticmethod
     def pil_to_datauri(img):
-        #converts PIL image to datauri
+        # converts PIL image to datauri
         data = BytesIO()
         img.save(data, "JPEG")
         data64 = base64.b64encode(data.getvalue())
